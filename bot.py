@@ -197,5 +197,5 @@ def main():
     print("البوت يعمل...")
     app.run(host='0.0.0.0', port=8443)
 
-if name == 'main':
+if __name__ == '__main__':
     main()
