@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # إعداد Flask
-app = Flask(os.name)
+app = Flask(name)
 
 # بيانات وهمية للسنة الأولى
 resources = {
