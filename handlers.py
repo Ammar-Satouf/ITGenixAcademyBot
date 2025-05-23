@@ -25,50 +25,52 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/notes 1 1 practical - لملاحظات المواد العملية"
     )
 
+def validate_args(args):
+    if len(args) < 3:
+        return False, "يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /command 1 1 practical"
+    year, semester, subject_type = args[0], args[1], args[2]
+    if year not in resources or semester not in resources[year] or subject_type not in resources[year][semester]:
+        return False, "خطأ: تحقق من السنة أو الفصل أو نوع المادة"
+    return True, (year, semester, subject_type)
+
 async def lectures(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_message:
         return
     args = context.args or []
-    if len(args) < 3:
-        await update.effective_message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /lectures 1 1 practical")
+    valid, result = validate_args(args)
+    if not valid:
+        await update.effective_message.reply_text(result)
         return
-    year, semester, subject_type = args[0], args[1], args[2]
-    if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
-        response = "محاضرات:\n"
-        for subject, data in resources[year][semester][subject_type].items():
-            response += f"- {subject}: {data['lectures']}\n"
-        await update.effective_message.reply_text(response)
-    else:
-        await update.effective_message.reply_text("خطأ: تحقق من السنة أو الفصل أو نوع المادة")
+    year, semester, subject_type = result
+    response = "محاضرات:\n"
+    for subject, data in resources[year][semester][subject_type].items():
+        response += f"- {subject}: {data.get('lectures', 'لا توجد محاضرات')}\n"
+    await update.effective_message.reply_text(response)
 
 async def exams(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_message:
         return
     args = context.args or []
-    if len(args) < 3:
-        await update.effective_message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /exams 1 1 practical")
+    valid, result = validate_args(args)
+    if not valid:
+        await update.effective_message.reply_text(result)
         return
-    year, semester, subject_type = args[0], args[1], args[2]
-    if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
-        response = "أسئلة الامتحانات:\n"
-        for subject, data in resources[year][semester][subject_type].items():
-            response += f"- {subject}: {data['exams']}\n"
-        await update.effective_message.reply_text(response)
-    else:
-        await update.effective_message.reply_text("خطأ: تحقق من السنة أو الفصل أو نوع المادة")
+    year, semester, subject_type = result
+    response = "أسئلة الامتحانات:\n"
+    for subject, data in resources[year][semester][subject_type].items():
+        response += f"- {subject}: {data.get('exams', 'لا توجد أسئلة')}\n"
+    await update.effective_message.reply_text(response)
 
 async def notes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_message:
         return
     args = context.args or []
-    if len(args) < 3:
-        await update.effective_message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /notes 1 1 practical")
+    valid, result = validate_args(args)
+    if not valid:
+        await update.effective_message.reply_text(result)
         return
-    year, semester, subject_type = args[0], args[1], args[2]
-    if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
-        response = "ملاحظات هامة:\n"
-        for subject, data in resources[year][semester][subject_type].items():
-            response += f"- {subject}: {data['notes']}\n"
-        await update.effective_message.reply_text(response)
-    else:
-        await update.effective_message.reply_text("خطأ: تحقق من السنة أو الفصل أو نوع المادة")
+    year, semester, subject_type = result
+    response = "ملاحظات هامة:\n"
+    for subject, data in resources[year][semester][subject_type].items():
+        response += f"- {subject}: {data.get('notes', 'لا توجد ملاحظات')}\n"
+    await update.effective_message.reply_text(response)
