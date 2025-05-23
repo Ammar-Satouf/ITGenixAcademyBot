@@ -165,7 +165,7 @@ def ping():
 def keep_alive():
     while True:
         try:
-            requests.get("https://itgenixacademybot.onrender.com")  # غيّرها للرابط الحقيقي
+            requests.get("https://itgenixacademybot.onrender.com/ping")  # غيّرها للرابط الحقيقي
             print("Keep alive ping sent")
         except Exception as e:
             print(f"Keep alive error: {e}")
@@ -191,7 +191,7 @@ def main():
 
     # تهيئة Webhook
     async def setup_webhook():
-        await application.bot.set_webhook(url="https://your-app-name.onrender.com/webhook")  # غيّر الرابط
+        await application.bot.set_webhook(url="https://itgenixacademybot.onrender.com/webhook")  # غيّر الرابط
         print("Webhook set.")
 
     asyncio.run(setup_webhook())
