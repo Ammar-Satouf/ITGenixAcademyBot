@@ -7,8 +7,10 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
+# إعداد Flask
 app = Flask(__name__)
 
+# بيانات وهمية للسنة الأولى
 resources = {
     "1": {
         "1": {
@@ -86,6 +88,10 @@ resources = {
     },
 }
 
+@app.route('/')
+def home():
+    return "بوت ITGenix يعمل بنجاح!"
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "مرحبًا! أنا بوت دراسة الهندسة المعلوماتية 🖥\n"
@@ -109,7 +115,7 @@ async def lectures(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 3:
         await update.message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /lectures 1 1 practical")
         return
-    year, semester, subject_type = context.args
+    year, semester, subject_type = context.args[0], context.args[1], context.args[2]
     if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
         response = "محاضرات:\n"
         for subject, data in resources[year][semester][subject_type].items():
@@ -122,7 +128,7 @@ async def exams(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 3:
         await update.message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /exams 1 1 practical")
         return
-    year, semester, subject_type = context.args
+    year, semester, subject_type = context.args[0], context.args[1], context.args[2]
     if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
         response = "أسئلة الامتحانات:\n"
         for subject, data in resources[year][semester][subject_type].items():
@@ -135,7 +141,7 @@ async def notes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 3:
         await update.message.reply_text("يرجى إدخال السنة، الفصل، ونوع المادة. مثال: /notes 1 1 practical")
         return
-    year, semester, subject_type = context.args
+    year, semester, subject_type = context.args[0], context.args[1], context.args[2]
     if year in resources and semester in resources[year] and subject_type in resources[year][semester]:
         response = "ملاحظات هامة:\n"
         for subject, data in resources[year][semester][subject_type].items():
@@ -143,8 +149,6 @@ async def notes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(response)
     else:
         await update.message.reply_text("خطأ: تحقق من السنة أو الفصل أو نوع المادة")
-
-application = None
 
 @app.route('/webhook', methods=['POST'])
 async def webhook():
@@ -159,11 +163,13 @@ def ping():
 def keep_alive():
     while True:
         try:
-            requests.get("https://itgenixacademybot.onrender.com/ping")
+            requests.get("https://itgenixacademybot.onrender.com/ping")  # غيّرها للرابط الحقيقي
             print("Keep alive ping sent")
         except Exception as e:
             print(f"Keep alive error: {e}")
         time.sleep(600)
+
+application = None
 
 def main():
     global application
@@ -183,13 +189,15 @@ def main():
     threading.Thread(target=keep_alive, daemon=True).start()
 
     async def setup_webhook():
-        await application.bot.set_webhook(url="https://itgenixacademybot.onrender.com/webhook")
+        await application.bot.set_webhook(url="https://itgenixacademybot.onrender.com/webhook")  # غيّر الرابط
         print("Webhook set.")
 
     asyncio.run(setup_webhook())
 
     print("البوت يعمل...")
-    app.run(host='0.0.0.0', port=8443)
+
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=8443)
 
 if __name__ == '__main__':
     main()
