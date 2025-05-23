@@ -1,16 +1,13 @@
-import threading
-import time
-import requests
 import os
 import asyncio
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# إعداد Flask
 app = Flask(__name__)
+application = None
 
-# بيانات وهمية للسنة الأولى
+# بيانات وهمية للموارد (نفس اللي بعثتها)
 resources = {
     "1": {
         "1": {
@@ -88,10 +85,7 @@ resources = {
     },
 }
 
-@app.route('/')
-def home():
-    return "بوت ITGenix يعمل بنجاح!"
-
+# أوامر البوت
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "مرحبًا! أنا بوت دراسة الهندسة المعلوماتية 🖥\n"
@@ -150,54 +144,45 @@ async def notes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("خطأ: تحقق من السنة أو الفصل أو نوع المادة")
 
+# إعداد Flask لاستقبال تحديثات البوت عبر Webhook
 @app.route('/webhook', methods=['POST'])
 async def webhook():
     update = Update.de_json(request.get_json(force=True), application.bot)
     await application.process_update(update)
     return 'OK', 200
 
+# endpoint للـ ping للحفاظ على سيرفر حي
 @app.route('/ping', methods=['GET'])
 def ping():
-    return 'Bot is alive!', 200
-
-def keep_alive():
-    while True:
-        try:
-            requests.get("https://itgenixacademybot.onrender.com/ping")  # غيّرها للرابط الحقيقي
-            print("Keep alive ping sent")
-        except Exception as e:
-            print(f"Keep alive error: {e}")
-        time.sleep(600)
-
-application = None
+    return "Bot is alive!", 200
 
 def main():
     global application
     bot_token = os.getenv('BOT_TOKEN')
     if not bot_token:
-        print("خطأ: لم يتم العثور على BOT_TOKEN")
+        print("Error: BOT_TOKEN not found in environment variables")
         return
 
     application = Application.builder().token(bot_token).build()
 
+    # إضافة أوامر البوت
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("lectures", lectures))
     application.add_handler(CommandHandler("exams", exams))
     application.add_handler(CommandHandler("notes", notes))
 
-    threading.Thread(target=keep_alive, daemon=True).start()
-
+    # ضبط webhook مع الرابط الصحيح (غيّر الرابط حسب مشروعك على Render)
     async def setup_webhook():
-        await application.bot.set_webhook(url="https://itgenixacademybot.onrender.com/webhook")  # غيّر الرابط
+        await application.bot.set_webhook("https://itgenixacademybot.onrender.com/webhook")
         print("Webhook set.")
 
     asyncio.run(setup_webhook())
 
-    print("البوت يعمل...")
+    print("البوت شغال...")
 
-    from waitress import serve
-    serve(app, host='0.0.0.0', port=8443)
+    # تشغيل Flask على المنفذ المحدد (المنفذ يأتي من Render عادة عبر متغير PORT)
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 8443)))
 
 if __name__ == '__main__':
     main()
