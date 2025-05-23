@@ -1,3 +1,4 @@
+import os
 import asyncio
 from flask import Flask, request
 from telegram import Update
@@ -6,39 +7,43 @@ from handlers import start, help_command, lectures, exams, notes
 from config import BOT_TOKEN, WEBHOOK_URL, PORT
 
 app = Flask(__name__)
-bot_app = None  # لمنع الخلط مع Flask app
+application = None
 
 @app.route('/webhook', methods=['POST'])
-def webhook():
-    update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    asyncio.run(bot_app.process_update(update))
+async def webhook():
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
     return 'OK', 200
 
 @app.route('/ping', methods=['GET'])
 def ping():
-    return "✅ Bot is alive", 200
+    return "Bot is alive!", 200
 
 def main():
-    global bot_app
+    global application
 
-    bot_app = Application.builder().token(BOT_TOKEN).build()
+    if not BOT_TOKEN or not WEBHOOK_URL:
+        print("تأكد من إعداد متغيرات البيئة BOT_TOKEN و WEBHOOK_URL")
+        return
 
-    # تسجيل الأوامر
-    bot_app.add_handler(CommandHandler("start", start))
-    bot_app.add_handler(CommandHandler("help", help_command))
-    bot_app.add_handler(CommandHandler("lectures", lectures))
-    bot_app.add_handler(CommandHandler("exams", exams))
-    bot_app.add_handler(CommandHandler("notes", notes))
+    application = Application.builder().token(BOT_TOKEN).build()
 
-    # إعداد Webhook
-    async def setup_webhook():
-        await bot_app.bot.set_webhook(url=WEBHOOK_URL)
-        print(f"✅ Webhook set: {WEBHOOK_URL}")
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("lectures", lectures))
+    application.add_handler(CommandHandler("exams", exams))
+    application.add_handler(CommandHandler("notes", notes))
 
-    asyncio.run(setup_webhook())
+    async def set_webhook():
+        await application.bot.set_webhook(WEBHOOK_URL)
+        print(f"Webhook set to {WEBHOOK_URL}")
 
-    print("🚀 Bot is running...")
-    app.run(host="0.0.0.0", port=PORT)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(set_webhook())
 
-if __name__ == '__main__':
+    print("البوت شغال...")
+
+    app.run(host='0.0.0.0', port=PORT)
+
+if __name__ == "__main__":
     main()
