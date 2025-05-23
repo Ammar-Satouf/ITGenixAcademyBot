@@ -22,8 +22,8 @@
 ## 🚀 طريقة التشغيل المحلي
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/Ammar-Satouf/ITGenixBot.git
+cd ITGenixBot
 python -m venv venv
 source venv/bin/activate  # أو venv\Scripts\activate على ويندوز
 pip install -r requirements.txt
