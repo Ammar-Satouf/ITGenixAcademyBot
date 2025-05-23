@@ -1,29 +1,19 @@
-# ITGenix Academy Bot 🤖📚
+# ITGenixBot 🤖
 
-بوت تعليمي على تلغرام مخصص لمساعدة طلاب كلية الهندسة المعلوماتية في الوصول السريع إلى:
-- روابط المحاضرات
-- أسئلة الامتحانات السابقة
-- ملاحظات دراسية هامة
+Telegram bot to help Information Engineering students with lectures, exams, and notes.
 
-يعمل باستخدام Webhook + Flask ويتم نشره على Render.
+## Features
+- Organized access to resources by year, semester, and type.
+- Quick commands for lectures, exams, and study notes.
+- Webhook based deployment with Flask.
 
----
+## Usage
+Start chatting with the bot here 👉 [ITGenixBot](https://t.me/ITGenixbot)
 
-## 🧰 الأدوات المستخدمة
+## Deployment
+Make sure to set your `BOT_TOKEN` as an environment variable.
 
-- Python 3.10+
-- Flask
-- python-telegram-bot (نسخة Async)
-- Webhook system + Keep Alive Ping
-- Render.com للنشر
-
----
-
-## 🚀 طريقة التشغيل المحلي
-
+### Local run
 ```bash
-git clone https://github.com/Ammar-Satouf/ITGenixBot.git
-cd ITGenixBot
-python -m venv venv
-source venv/bin/activate  # أو venv\Scripts\activate على ويندوز
 pip install -r requirements.txt
+python bot.py
