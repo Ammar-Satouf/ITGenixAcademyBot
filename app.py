@@ -5,6 +5,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler
 from handlers import start, help_command, lectures, exams, notes
 from dotenv import load_dotenv
+from threading import Thread
 
 load_dotenv()  # تحميل متغيرات البيئة من .env
 
@@ -20,6 +21,9 @@ async def webhook():
 @app.route('/ping', methods=['GET'])
 def ping():
     return "Bot is alive!", 200
+
+def run_flask(port):
+    app.run(host='0.0.0.0', port=port)
 
 def main():
     global application
@@ -39,16 +43,16 @@ def main():
     application.add_handler(CommandHandler("exams", exams))
     application.add_handler(CommandHandler("notes", notes))
 
-    async def set_webhook():
+    async def run_bot():
+        await application.initialize()
+        await application.start()
         await application.bot.set_webhook(webhook_url)
         print(f"Webhook set to {webhook_url}")
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(set_webhook())
-
+    # تشغيل بوت تلغرام (async) و flask (في thread) معًا
+    asyncio.run(run_bot())
+    Thread(target=run_flask, args=(port,)).start()
     print("البوت شغال...")
-
-    app.run(host='0.0.0.0', port=port)
 
 if __name__ == "__main__":
     main()
