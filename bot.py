@@ -9,7 +9,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # إعداد Flask
-app = Flask(_name_)
+app = Flask(__name__)
 
 # بيانات وهمية للسنة الأولى
 resources = {
@@ -199,5 +199,5 @@ def main():
     print("البوت يعمل...")
     app.run(host='0.0.0.0', port=8443)
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
